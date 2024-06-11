@@ -1,71 +1,113 @@
-#!/bin/bash
+#!/bin/sh
+
+# Function to display a prompt before executing a command
+prompt_execute() {
+    echo "================================================================================"
+    echo "Press ENTER to proceed with the next step."
+    echo "================================================================================"
+    read -r
+    echo "================================================================================"
+    echo "Executing: $@"
+    echo "================================================================================"
+    "$@"
+}
+
+# Function to execute a command with confirmation using Gum
+execute_with_confirmation() {
+    echo "================================================================================"
+    echo "Do you want to execute the following command? (y/n)"
+    echo "$@"
+    echo "================================================================================"
+    read -r choice
+    if [ "$choice" = "y" ]; then
+        echo "================================================================================"
+        echo "Executing: $@"
+        echo "================================================================================"
+        "$@"
+    else
+        echo "================================================================================"
+        echo "Skipping: $@"
+        echo "================================================================================"
+    fi
+}
+
+# Install gum
+execute_with_confirmation sudo npm install -g @dillonkearns/gum
+
+# Set up the command-line interface using gum
+execute_with_confirmation gum setup
+
+# Add latest stable PPAs for Ubuntu
+execute_with_confirmation sudo add-apt-repository -y ppa:git-core/ppa
+execute_with_confirmation sudo add-apt-repository -y ppa:ubuntu-lxc/lxd-stable
+execute_with_confirmation sudo add-apt-repository -y ppa:ansible/ansible
 
 # Update and upgrade the system
-sudo apt update && sudo apt upgrade -y
+execute_with_confirmation sudo apt update && sudo apt upgrade -y
 
 # Install required packages
-sudo apt install -y curl git zsh jq peco exa apt-transport-https ca-certificates software-properties-common zip unzip tar bzip2 wget
+execute_with_confirmation sudo apt install -y curl git zsh jq peco exa apt-transport-https ca-certificates software-properties-common zip unzip tar bzip2 wget
 
 # Download Nerd Fonts
-mkdir -p ~/.nerd-fonts
-wget -qO ~/.nerd-fonts/Hack.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Hack.zip
-unzip -q ~/.nerd-fonts/Hack.zip -d ~/.nerd-fonts
+execute_with_confirmation mkdir -p ~/.nerd-fonts
+execute_with_confirmation wget -qO ~/.nerd-fonts/Hack.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/Hack.zip
+execute_with_confirmation unzip -q ~/.nerd-fonts/Hack.zip -d ~/.nerd-fonts
 
 # Install Docker
-sudo apt-get remove docker docker-engine docker.io containerd runc
-sudo apt-get update
-sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo \
+execute_with_confirmation sudo apt-get remove docker docker-engine docker.io containerd runc
+execute_with_confirmation sudo apt-get update
+execute_with_confirmation sudo apt-get install -y apt-transport-https ca-certificates curl gnupg lsb-release
+execute_with_confirmation curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+execute_with_confirmation echo \
   "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+execute_with_confirmation sudo apt-get update
+execute_with_confirmation sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 
 # Install Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+execute_with_confirmation sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+execute_with_confirmation sudo chmod +x /usr/local/bin/docker-compose
+execute_with_confirmation sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 
 # Install Vagrant and VirtualBox
-sudo apt install -y vagrant virtualbox
+execute_with_confirmation sudo apt install -y vagrant virtualbox
 
 # Install Homebrew
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+execute_with_confirmation /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+execute_with_confirmation eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # Add Homebrew to PATH in .zshrc
 echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zshrc
 
 # Install other tools via Homebrew
-brew tap homebrew/cask-fonts
-brew install --cask font-hack-nerd-font
-brew install awscli terraform tfenv kubectx minikube helm krew derailed/k9s/k9s
+execute_with_confirmation brew tap homebrew/cask-fonts
+execute_with_confirmation brew install --cask font-hack-nerd-font
+execute_with_confirmation brew install awscli terraform tfenv kubectx minikube helm krew derailed/k9s/k9s
 
 # Install kubectl
-sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg
-curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
-echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list > /dev/null
-sudo apt-get update
-sudo apt-get install -y kubectl
+execute_with_confirmation sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg
+execute_with_confirmation curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+execute_with_confirmation echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list > /dev/null
+execute_with_confirmation sudo apt-get update
+execute_with_confirmation sudo apt-get install -y kubectl
 
 # Install Lens
-curl -fsSL https://dl.k8slens.dev/Lens-5.2.0.deb -o lens.deb
-sudo dpkg -i lens.deb
-rm lens.deb
+execute_with_confirmation curl -fsSL https://dl.k8slens.dev/Lens-5.2.0.deb -o lens.deb
+execute_with_confirmation sudo dpkg -i lens.deb
+execute_with_confirmation rm lens.deb
 
 # Install Helm
-curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+execute_with_confirmation curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 
 # Install Kustomize
-curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
-sudo mv kustomize /usr/local/bin/
+execute_with_confirmation curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+execute_with_confirmation sudo mv kustomize /usr/local/bin/
 
 # Install Oh My Zsh
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+execute_with_confirmation sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
 # Set up .zshrc
-cp ~/.zshrc ~/.zshrc.bak # Backup current .zshrc
+execute_with_confirmation cp ~/.zshrc ~/.zshrc.bak # Backup current .zshrc
 cat <<EOT >> ~/.zshrc
 # Custom Zsh configurations
 
@@ -191,47 +233,47 @@ disabled = false
 EOF
 
 # Change default shell to zsh
-chsh -s $(which zsh)
+execute_with_confirmation chsh -s $(which zsh)
 
 # Install Chrome
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i google-chrome-stable_current_amd64.deb
-sudo apt --fix-broken install -y
-rm google-chrome-stable_current_amd64.deb
+execute_with_confirmation wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+execute_with_confirmation sudo dpkg -i google-chrome-stable_current_amd64.deb
+execute_with_confirmation sudo apt --fix-broken install -y
+execute_with_confirmation rm google-chrome-stable_current_amd64.deb
 
 # Install Firefox
-sudo apt install -y firefox
+execute_with_confirmation sudo apt install -y firefox
 
 # Install VS Code
-wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
-sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
-sudo apt update
-sudo apt install -y code
-rm packages.microsoft.gpg
+execute_with_confirmation wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
+execute_with_confirmation sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
+execute_with_confirmation sudo sh -c 'echo "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
+execute_with_confirmation sudo apt update
+execute_with_confirmation sudo apt install -y code
+execute_with_confirmation rm packages.microsoft.gpg
 
 # Install VS Code extensions
-code --install-extension ms-azuretools.vscode-docker
-code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
-code --install-extension hashicorp.terraform
-code --install-extension ms-python.python
-code --install-extension eamodio.gitlens
-code --install-extension esbenp.prettier-vscode
+execute_with_confirmation code --install-extension ms-azuretools.vscode-docker
+execute_with_confirmation code --install-extension ms-kubernetes-tools.vscode-kubernetes-tools
+execute_with_confirmation code --install-extension hashicorp.terraform
+execute_with_confirmation code --install-extension ms-python.python
+execute_with_confirmation code --install-extension eamodio.gitlens
+execute_with_confirmation code --install-extension esbenp.prettier-vscode
 
 # Install Podman
 . /etc/os-release
-sudo sh -c "echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_\$VERSION_ID/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
-wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_\$VERSION_ID/Release.key -O Release.key
-sudo apt-key add - < Release.key
-sudo apt update
-sudo apt -y install podman
+execute_with_confirmation sudo sh -c "echo 'deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_\$VERSION_ID/ /' > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list"
+execute_with_confirmation wget -nv https://download.opensuse.org/repositories/devel:kubic:libcontainers:stable/xUbuntu_\$VERSION_ID/Release.key -O Release.key
+execute_with_confirmation sudo apt-key add - < Release.key
+execute_with_confirmation sudo apt update
+execute_with_confirmation sudo apt -y install podman
 
 # Reload zsh configuration
-source ~/.zshrc
+execute_with_confirmation source ~/.zshrc
 
 # Apply Fira Code font with ligatures support to VS Code
-sed -i 's/"editor.fontFamily": ".*"/"editor.fontFamily": "Fira Code",/g' ~/.config/Code/User/settings.json
-sed -i 's/"editor.fontLigatures": .*/"editor.fontLigatures": true,/g' ~/.config/Code/User/settings.json
+execute_with_confirmation sed -i 's/"editor.fontFamily": ".*"/"editor.fontFamily": "Fira Code",/g' ~/.config/Code/User/settings.json
+execute_with_confirmation sed -i 's/"editor.fontLigatures": .*/"editor.fontLigatures": true,/g' ~/.config/Code/User/settings.json
 
 # Set VS Code theme
 cat <<EOT >> ~/.config/Code/User/settings.json
