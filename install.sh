@@ -42,6 +42,25 @@ brew tap homebrew/cask-fonts
 brew install --cask font-hack-nerd-font
 brew install awscli terraform tfenv kubectx minikube helm krew derailed/k9s/k9s
 
+# Install kubectl
+sudo apt-get update && sudo apt-get install -y apt-transport-https gnupg
+curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list > /dev/null
+sudo apt-get update
+sudo apt-get install -y kubectl
+
+# Install Lens
+curl -fsSL https://dl.k8slens.dev/Lens-5.2.0.deb -o lens.deb
+sudo dpkg -i lens.deb
+rm lens.deb
+
+# Install Helm
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+
+# Install Kustomize
+curl -s "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh" | bash
+sudo mv kustomize /usr/local/bin/
+
 # Install Oh My Zsh
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 
@@ -67,6 +86,109 @@ if [ -d "\$HOME/.tfenv" ]; then
   export PATH="\$HOME/.tfenv/bin:\$PATH"
 fi
 EOT
+
+# Set up Starship prompt with custom config
+mkdir -p ~/.config
+cat <<'EOF' > ~/.config/starship.toml
+# Inserts a blank line between shell prompts
+add_newline = true
+
+# Change the default prompt format
+format = '''\
+\$env_var\
+\$all \$character'''
+
+# Change the default prompt characters
+[character]
+success_symbol = "[](green)"
+error_symbol = "[](red)"
+
+# Shows an icon depending on what distro it is running on
+[env_var.STARSHIP_DISTRO]
+format = '[$env_value](bold white) '
+variable = "STARSHIP_DISTRO"
+disabled = false
+
+# Shows an icon depending on what device it is running on
+[env_var.STARSHIP_DEVICE]
+format = '[$env_value](bold yellow)'
+variable = "STARSHIP_DEVICE"
+disabled = false
+
+# ---
+
+[aws]
+format = ''
+style = 'bold blue'
+[aws.region_aliases]
+ap-southeast-2 = 'au'
+us-east-1 = 'va'
+
+# Shows current directory
+[directory]
+truncation_length = 20
+truncation_symbol = "…/"
+home_symbol = " ~"
+read_only_style = "197"
+read_only = "  "
+format = "[$path](\$style)[$read_only](\$read_only_style) "
+
+# Shows current git branch
+[git_branch]
+symbol = " "
+format = "[$symbol\$branch](\$style) "
+# truncation_length = 4
+truncation_symbol = "…/"
+style = "bold green"
+
+# Shows current git status
+[git_status]
+format = '[\(\$all_status\$ahead_behind\)](\$style) '
+style = "bold green"
+conflicted = "🏳"
+up_to_date = ""
+untracked = " "
+ahead = "⇡\${count}"
+diverged = "⇕⇡\${ahead_count}⇣\${behind_count}"
+behind = "⇣\${count}"
+stashed = " "
+modified = " "
+staged = '[++\(\$count\)](green)'
+renamed = "襁 "
+deleted = " "
+
+# Shows kubernetes context and namespace
+[kubernetes]
+format = '[󱃾 \$context\(\$namespace\)](bold purple) '
+disabled = false
+
+# ---
+
+# Disable some modules that aren't needed anymore
+[username]
+disabled = true
+
+[vagrant]
+disabled = true
+
+[docker_context]
+disabled = true
+
+[helm]
+disabled = false
+
+[python]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[ruby]
+disabled = true
+
+[terraform]
+disabled = false
+EOF
 
 # Change default shell to zsh
 chsh -s $(which zsh)
