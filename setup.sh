@@ -45,7 +45,7 @@ options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "New Terminal" "Do
 choices=$(gum choose --no-limit "${options[@]}")
 
 # Add latest stable PPAs and update
-setup_ppa "ppa:deadsnakes/ppa"
+# setup_ppa "ppa:deadsnakes/ppa"
 
 # Install selected tools
 for choice in "${choices[@]}"; do
