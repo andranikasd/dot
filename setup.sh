@@ -5,7 +5,6 @@ fancy_log() {
     gum style --foreground 212 --bold -- "$1"
 }
 
-
 # Function to install gum
 install_gum() {
     if ! command -v gum &> /dev/null; then
@@ -23,6 +22,7 @@ setup_prereq() {
     sudo apt upgrade -y -qq
     sudo apt install wget curl git ca-certificates software-properties-common dirmngr apt-transport-https lsb-release -y -qq
 }
+
 # Function to install Homebrew
 install_homebrew() {
     if ! command -v brew &> /dev/null; then
@@ -62,14 +62,14 @@ install_gum
 install_homebrew
 
 # Prompt user for tools to install
-options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "Tilix Terminal" "Kitty" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3, pip, venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola" "Node.js" "Postman" "Insomnia" "Ansible" "Azure CLI" "Google Cloud SDK" "Minikube" "Helm")
+options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "Tilix Terminal" "Kitty" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3" "pip" "venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola" "Node.js" "Postman" "Insomnia" "Ansible" "Azure CLI" "Google Cloud SDK" "Minikube" "Helm")
 choices=$(gum choose --no-limit "${options[@]}")
 
 # Convert the choices into an array
 IFS=$'\n' read -r -d '' -a selected_choices <<< "$choices"
 
 # Add latest stable PPAs and update
-setup_ppa "ppa:deadsnakes/ppa"
+# setup_ppa "ppa:deadsnakes/ppa"
 
 # Install selected tools
 for choice in "${selected_choices[@]}"; do
