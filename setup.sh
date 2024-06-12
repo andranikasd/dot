@@ -246,11 +246,6 @@ if [[ " ${choices[@]} " =~ "Git" ]]; then
     git config --global user.email "$(gum input --placeholder 'Enter your git email')"
 fi
 
-# Prompt user for Slack login
-if [[ " ${choices[@]} " =~ "Slack" ]]; then
-    echo "Please log in to Slack using the GUI."
-    slack &
-fi
 
 # Final system update
 sudo apt-get update && sudo apt-get upgrade -y
