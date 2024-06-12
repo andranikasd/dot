@@ -212,5 +212,3 @@ sudo apt-get update && sudo apt-get upgrade -y
 
 # Final setup
 echo "Setup complete. Please restart your terminal or source your .zshrc file to apply changes."
-
-This script includes the necessary
