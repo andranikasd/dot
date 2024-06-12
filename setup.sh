@@ -46,9 +46,10 @@ choices=$(gum choose --no-limit "${options[@]}")
 
 # Add latest stable PPAs and update
 # setup_ppa "ppa:deadsnakes/ppa"
+IFS=$'\n' read -r -d '' -a selected_choices <<< "$choices"
 
 # Install selected tools
-for choice in "${choices[@]}"; do
+for choice in "${selected_choices[@]}"; do
     case $choice in
         "Browsers")
             install_apt_package firefox
@@ -228,7 +229,7 @@ for choice in "${choices[@]}"; do
 done
 
 # Setup Zsh and Starship
-if [[ " ${choices[@]} " =~ "Zsh" ]]; then
+if [[ " ${selected_choices[@]} " =~ "Zsh" ]]; then
     mkdir -p ~/.zsh
     cp .zsh/aliases.zsh ~/.zsh/
     cp .zsh/env.zsh ~/.zsh/
@@ -241,7 +242,7 @@ if [[ " ${choices[@]} " =~ "Zsh" ]]; then
 fi
 
 # Setup git global user profile
-if [[ " ${choices[@]} " =~ "Git" ]]; then
+if [[ " ${selected_choices[@]} " =~ "Git" ]]; then
     git config --global user.name "$(gum input --placeholder 'Enter your git username')"
     git config --global user.email "$(gum input --placeholder 'Enter your git email')"
 fi
