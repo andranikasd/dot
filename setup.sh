@@ -165,7 +165,7 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package virtualbox
             ;;
         "Nerd Fonts")
-            install_brew_package --cask font-fira-code-nerd-font
+            brew install --cask font-fira-code-nerd-font
             ;;
         "Homebrew")
             fancy_log "Homebrew is already installed as a prerequisite."
@@ -178,10 +178,10 @@ for choice in "${selected_choices[@]}"; do
             install_brew_package node
             ;;
         "Postman")
-            install_brew_package --cask postman
+            brew install --cask postman
             ;;
         "Insomnia")
-            install_brew_package --cask insomnia
+            brew install --cask insomnia
             ;;
         "Ansible")
             install_brew_package ansible
