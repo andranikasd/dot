@@ -3,7 +3,7 @@
 setup_prereq() {
     sudo apt update
     sudo apt upgrade -y
-    sudo apt install wget curl git ca-certificates -y 
+    sudo apt install wget curl git ca-certificates software-properties-common -y 
 }
 
 # Function to install gum
@@ -41,7 +41,7 @@ setup_prereq
 install_gum
 
 # Prompt user for tools to install
-options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "New Terminal" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3, pip, venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola")
+options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "New Terminal" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3, pip, venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola" "Node.js" "Postman" "Insomnia" "Ansible" "Azure CLI" "Google Cloud SDK" "Minikube" "Helm")
 choices=$(gum choose --no-limit "${options[@]}")
 
 # Add latest stable PPAs and update
@@ -58,7 +58,7 @@ for choice in "${choices[@]}"; do
             install_apt_package google-chrome-stable
             ;;
         "Slack")
-            wget https://downloads.slack-edge.com/releases/linux/4.20.0/prod/x64/slack-desktop-4.20.0-amd64.deb
+            wget https://downloads.slack-edge.com/releases/linux/4.29.149/prod/x64/slack-desktop-4.29.149-amd64.deb
             sudo dpkg -i slack-desktop-*.deb
             sudo apt-get install -f -y
             ;;
@@ -88,7 +88,20 @@ for choice in "${choices[@]}"; do
             install_apt_package tilix
             ;;
         "Docker")
-            install_apt_package docker.io
+            sudo apt-get remove docker docker-engine docker.io containerd runc
+            sudo apt-get update
+            sudo apt-get install -y \
+                apt-transport-https \
+                ca-certificates \
+                curl \
+                gnupg \
+                lsb-release
+            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+            echo \
+              "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+              $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+            sudo apt-get update
+            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
             sudo systemctl start docker
             sudo systemctl enable docker
             sudo usermod -aG docker $USER
@@ -129,7 +142,7 @@ for choice in "${choices[@]}"; do
         "kubectl")
             install_apt_package apt-transport-https
             curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-            echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+            echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
             sudo apt-get update
             install_apt_package kubectl
             echo 'source <(kubectl completion zsh)' >>~/.zshrc
@@ -153,8 +166,8 @@ for choice in "${choices[@]}"; do
             install_apt_package yq
             ;;
         "Golang")
-            wget https://dl.google.com/go/go1.17.6.linux-amd64.tar.gz
-            sudo tar -C /usr/local -xzf go1.17.6.linux-amd64.tar.gz
+            wget https://dl.google.com/go/go1.20.4.linux-amd64.tar.gz
+            sudo tar -C /usr/local -xzf go1.20.4.linux-amd64.tar.gz
             echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.zshrc
             source ~/.zshrc
             ;;
@@ -164,7 +177,7 @@ for choice in "${choices[@]}"; do
             ;;
         "Nerd Fonts")
             mkdir -p ~/.local/share/fonts
-            wget -qO- https://github.com/ryanoasis/nerd-fonts/releases/download/v2.1.0/FiraCode.zip | bsdtar -xvf- -C ~/.local/share/fonts
+            wget -qO- https://github.com/ryanoasis/nerd-fonts/releases/download/v2.2.2/FiraCode.zip | bsdtar -xvf- -C ~/.local/share/fonts
             fc-cache -fv
             ;;
         "Homebrew")
@@ -175,6 +188,41 @@ for choice in "${choices[@]}"; do
         "Git-Cola")
             setup_ppa "ppa:git-core/ppa"
             install_apt_package git-cola
+            ;;
+        "Node.js")
+            curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
+            install_apt_package nodejs
+            ;;
+        "Postman")
+            sudo snap install postman
+            ;;
+        "Insomnia")
+            sudo snap install insomnia
+            ;;
+        "Ansible")
+            sudo apt-add-repository --yes --update ppa:ansible/ansible
+            install_apt_package ansible
+            ;;
+        "Azure CLI")
+            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            ;;
+        "Google Cloud SDK")
+            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+            sudo apt-get install apt-transport-https ca-certificates gnupg -y
+            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
+            sudo apt-get update && sudo apt-get install google-cloud-sdk
+            ;;
+        "Minikube")
+            curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+            chmod +x minikube-linux-amd64
+            sudo mv minikube-linux-amd64 /usr/local/bin/minikube
+            ;;
+        "Helm")
+            curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
+            sudo apt-get install apt-transport-https --yes
+            echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
+            sudo apt-get update
+            install_apt_package helm
             ;;
     esac
 done
