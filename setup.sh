@@ -1,6 +1,3 @@
-Sure, here is the refactored and corrected script:
-
-```bash
 #!/bin/bash
 
 setup_prereq() {
