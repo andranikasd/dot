@@ -1,0 +1,8 @@
+1) Bug in vscode PPA 
+2) Slack debian package cant be fount with dpkg 
+3) Add Pycharm 
+4) Tillix 
+5) kubectl
+6) Starship 
+7) fzf 
+8) zsh configs not paster
