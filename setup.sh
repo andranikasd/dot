@@ -8,7 +8,6 @@ fancy_log() {
 # Function to install gum
 install_gum() {
     if ! command -v gum &> /dev/null; then
-        fancy_log "Installing gum..."
         mkdir -p ~/.local/bin
         wget -qO- https://github.com/charmbracelet/gum/releases/download/v0.8.0/gum_0.8.0_Linux_x86_64.tar.gz | tar xvz -C ~/.local/bin gum
         export PATH=$PATH:~/.local/bin
