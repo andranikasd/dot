@@ -5,12 +5,6 @@ fancy_log() {
     gum style --foreground 212 --bold -- "$1"
 }
 
-setup_prereq() {
-    fancy_log "Setting up prerequisites..."
-    sudo apt update -qq
-    sudo apt upgrade -y -qq
-    sudo apt install wget curl git ca-certificates software-properties-common dirmngr apt-transport-https lsb-release -y -qq
-}
 
 # Function to install gum
 install_gum() {
@@ -22,6 +16,13 @@ install_gum() {
     fi
 }
 
+setup_prereq() {
+    install_gum
+    fancy_log "Setting up prerequisites..."
+    sudo apt update -qq
+    sudo apt upgrade -y -qq
+    sudo apt install wget curl git ca-certificates software-properties-common dirmngr apt-transport-https lsb-release -y -qq
+}
 # Function to install Homebrew
 install_homebrew() {
     if ! command -v brew &> /dev/null; then
