@@ -1,9 +1,11 @@
+Sure, here is the refactored and corrected script:
+
+```bash
 #!/bin/bash
 
 # Function to install gum
 install_gum() {
-    if ! command -v gum &> /dev/null
-    then
+    if ! command -v gum &> /dev/null; then
         echo "Installing gum..."
         mkdir -p ~/.local/bin
         wget -qO- https://github.com/charmbracelet/gum/releases/download/v0.8.0/gum_0.8.0_Linux_x86_64.tar.gz | tar xvz -C ~/.local/bin gum
@@ -13,8 +15,7 @@ install_gum() {
 
 # Function to install a package via apt
 install_apt_package() {
-    if ! dpkg -s "$1" &> /dev/null
-    then
+    if ! dpkg -s "$1" &> /dev/null; then
         sudo apt-get install -y "$1"
     fi
 }
@@ -43,7 +44,7 @@ choices=$(gum choose --no-limit "${options[@]}")
 setup_ppa "ppa:deadsnakes/ppa"
 
 # Install selected tools
-for choice in $choices; do
+for choice in "${choices[@]}"; do
     case $choice in
         "Browsers")
             install_apt_package firefox
@@ -53,7 +54,7 @@ for choice in $choices; do
             install_apt_package google-chrome-stable
             ;;
         "Slack")
-            wget https://downloads.slack-edge.com/linux_releases/slack-desktop-4.20.0-amd64.deb
+            wget https://downloads.slack-edge.com/releases/linux/4.20.0/prod/x64/slack-desktop-4.20.0-amd64.deb
             sudo dpkg -i slack-desktop-*.deb
             sudo apt-get install -f -y
             ;;
@@ -204,3 +205,6 @@ sudo apt-get update && sudo apt-get upgrade -y
 
 # Final setup
 echo "Setup complete. Please restart your terminal or source your .zshrc file to apply changes."
+```
+
+This script includes the necessary
