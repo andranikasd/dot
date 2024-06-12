@@ -1,15 +1,21 @@
 #!/bin/bash
 
+# Function to print a fancy log message
+fancy_log() {
+    gum style --foreground 212 --bold -- "$1"
+}
+
 setup_prereq() {
-    sudo apt update
-    sudo apt upgrade -y
-    sudo apt install wget curl git ca-certificates software-properties-common dirmngr apt-transport-https lsb-release -y -y 
+    fancy_log "Setting up prerequisites..."
+    sudo apt update -qq
+    sudo apt upgrade -y -qq
+    sudo apt install wget curl git ca-certificates software-properties-common dirmngr apt-transport-https lsb-release -y -qq
 }
 
 # Function to install gum
 install_gum() {
     if ! command -v gum &> /dev/null; then
-        echo "Installing gum..."
+        fancy_log "Installing gum..."
         mkdir -p ~/.local/bin
         wget -qO- https://github.com/charmbracelet/gum/releases/download/v0.8.0/gum_0.8.0_Linux_x86_64.tar.gz | tar xvz -C ~/.local/bin gum
         export PATH=$PATH:~/.local/bin
@@ -19,7 +25,7 @@ install_gum() {
 # Function to install Homebrew
 install_homebrew() {
     if ! command -v brew &> /dev/null; then
-        echo "Installing Homebrew..."
+        fancy_log "Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zshrc
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
@@ -29,27 +35,30 @@ install_homebrew() {
 # Function to install a package via apt
 install_apt_package() {
     if ! dpkg -s "$1" &> /dev/null; then
-        sudo apt-get install -y "$1"
+        fancy_log "Installing $1 via apt..."
+        sudo apt-get install -y -qq "$1"
     fi
 }
 
 # Function to install a package via brew
 install_brew_package() {
     if ! brew list "$1" &> /dev/null; then
+        fancy_log "Installing $1 via brew..."
         brew install "$1"
     fi
 }
 
 # Function to setup a PPA and update
 setup_ppa() {
-    sudo add-apt-repository "$1" -y
-    sudo apt-get update
+    fancy_log "Setting up PPA $1..."
+    sudo add-apt-repository "$1" -y -qq
+    sudo apt-get update -qq
 }
 
 # Setup prereq, Install Homebrew & gum
 setup_prereq
-install_homebrew
 install_gum
+install_homebrew
 
 # Prompt user for tools to install
 options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "Tilix Terminal" "Kitty" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3, pip, venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola" "Node.js" "Postman" "Insomnia" "Ansible" "Azure CLI" "Google Cloud SDK" "Minikube" "Helm")
@@ -68,7 +77,7 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package firefox
             wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
             sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-            sudo apt-get update
+            sudo apt-get update -qq
             install_apt_package google-chrome-stable
             ;;
         "Slack")
@@ -77,7 +86,7 @@ for choice in "${selected_choices[@]}"; do
         "PyCharm")
             curl -s https://s3.eu-central-1.amazonaws.com/jetbrains-ppa/0xA6E8698A.pub.asc | gpg --dearmor | sudo tee /usr/share/keyrings/jetbrains-ppa-archive-keyring.gpg > /dev/null
             echo "deb [signed-by=/usr/share/keyrings/jetbrains-ppa-archive-keyring.gpg] http://jetbrains-ppa.s3-website.eu-central-1.amazonaws.com any main" | sudo tee /etc/apt/sources.list.d/jetbrains-ppa.list > /dev/null
-            sudo apt update && sudo apt upgrade
+            sudo apt update -qq
             install_apt_package pycharm-community
             ;;
         "Sublime Text")
@@ -102,7 +111,7 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package git
             ;;
         "CodeCommit")
-            install_apt_package git-remote-codecommit
+            install_brew_package git-remote-codecommit
             ;;
         "wget")
             install_apt_package wget
@@ -159,7 +168,7 @@ for choice in "${selected_choices[@]}"; do
             install_brew_package --cask font-fira-code-nerd-font
             ;;
         "Homebrew")
-            echo "Homebrew is already installed as a prerequisite."
+            fancy_log "Homebrew is already installed as a prerequisite."
             ;;
         "Git-Cola")
             setup_ppa "ppa:git-core/ppa"
@@ -194,6 +203,7 @@ done
 
 # Setup Zsh and Starship
 if [[ " ${selected_choices[@]} " =~ "Zsh" ]]; then
+    fancy_log "Setting up Zsh and Starship..."
     mkdir -p ~/.zsh
     cp .zsh/aliases.zsh ~/.zsh/
     cp .zsh/env.zsh ~/.zsh/
@@ -207,18 +217,14 @@ fi
 
 # Setup git global user profile
 if [[ " ${selected_choices[@]} " =~ "Git" ]]; then
+    fancy_log "Setting up Git global user profile..."
     git config --global user.name "$(gum input --placeholder 'Enter your git username')"
     git config --global user.email "$(gum input --placeholder 'Enter your git email')"
 fi
 
-# Prompt user for Slack login
-if [[ " ${selected_choices[@]} " =~ "Slack" ]]; then
-    echo "Please log in to Slack using the GUI."
-    slack &
-fi
-
 # Final system update
-sudo apt-get update && sudo apt-get upgrade -y
+fancy_log "Final system update..."
+sudo apt-get update -qq && sudo apt-get upgrade -y -qq
 
 # Final setup
-echo "Setup complete. Please restart your terminal or source your .zshrc file to apply changes."
+fancy_log "Setup complete. Please restart your terminal or source your .zshrc file to apply changes."
