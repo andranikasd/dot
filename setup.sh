@@ -3,7 +3,7 @@
 setup_prereq() {
     sudo apt update
     sudo apt upgrade -y
-    sudo apt install wget curl git ca-certificates software-properties-common -y 
+    sudo apt install wget curl git ca-certificates software-properties-common dirmngr apt-transport-https lsb-release -y -y 
 }
 
 # Function to install gum
@@ -16,6 +16,16 @@ install_gum() {
     fi
 }
 
+# Function to install Homebrew
+install_homebrew() {
+    if ! command -v brew &> /dev/null; then
+        echo "Installing Homebrew..."
+        /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zshrc
+        eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+    fi
+}
+
 # Function to install a package via apt
 install_apt_package() {
     if ! dpkg -s "$1" &> /dev/null; then
@@ -23,11 +33,11 @@ install_apt_package() {
     fi
 }
 
-# Function to install a package via curl and unzip
-install_curl_unzip() {
-    curl -sL "$1" -o "$2.zip"
-    unzip -o "$2.zip" -d "$3"
-    rm "$2.zip"
+# Function to install a package via brew
+install_brew_package() {
+    if ! brew list "$1" &> /dev/null; then
+        brew install "$1"
+    fi
 }
 
 # Function to setup a PPA and update
@@ -36,17 +46,20 @@ setup_ppa() {
     sudo apt-get update
 }
 
-# Setup prereq & Install gum
+# Setup prereq, Install Homebrew & gum
 setup_prereq
+install_homebrew
 install_gum
 
 # Prompt user for tools to install
-options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "New Terminal" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3, pip, venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola" "Node.js" "Postman" "Insomnia" "Ansible" "Azure CLI" "Google Cloud SDK" "Minikube" "Helm")
+options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "Tilix Terminal" "Kitty" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3, pip, venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola" "Node.js" "Postman" "Insomnia" "Ansible" "Azure CLI" "Google Cloud SDK" "Minikube" "Helm")
 choices=$(gum choose --no-limit "${options[@]}")
 
-# Add latest stable PPAs and update
-# setup_ppa "ppa:deadsnakes/ppa"
+# Convert the choices into an array
 IFS=$'\n' read -r -d '' -a selected_choices <<< "$choices"
+
+# Add latest stable PPAs and update
+setup_ppa "ppa:deadsnakes/ppa"
 
 # Install selected tools
 for choice in "${selected_choices[@]}"; do
@@ -59,53 +72,31 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package google-chrome-stable
             ;;
         "Slack")
-            wget https://downloads.slack-edge.com/releases/linux/4.29.149/prod/x64/slack-desktop-4.29.149-amd64.deb
-            sudo dpkg -i slack-desktop-*.deb
-            sudo apt-get install -f -y
+            install_brew_package slack
             ;;
         "PyCharm")
-            setup_ppa "ppa:mmk2410/intellij-idea"
-            install_apt_package intellij-idea-community
+            curl -s https://s3.eu-central-1.amazonaws.com/jetbrains-ppa/0xA6E8698A.pub.asc | gpg --dearmor | sudo tee /usr/share/keyrings/jetbrains-ppa-archive-keyring.gpg > /dev/null
+            echo "deb [signed-by=/usr/share/keyrings/jetbrains-ppa-archive-keyring.gpg] http://jetbrains-ppa.s3-website.eu-central-1.amazonaws.com any main" | sudo tee /etc/apt/sources.list.d/jetbrains-ppa.list > /dev/null
+            sudo apt update && sudo apt upgrade
+            install_apt_package pycharm-community
             ;;
         "Sublime Text")
-            wget -qO - https://download.sublimetext.com/sublimehq-pub.gpg | sudo apt-key add -
-            sudo apt-add-repository "deb https://download.sublimetext.com/ apt/stable/"
-            sudo apt-get update
-            install_apt_package sublime-text
+            install_brew_package sublime-text
             ;;
         "VSCode")
-            wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > packages.microsoft.gpg
-            sudo install -o root -g root -m 644 packages.microsoft.gpg /usr/share/keyrings/
-            sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main" > /etc/apt/sources.list.d/vscode.list'
-            sudo apt-get update
-            install_apt_package code
-            code --install-extension ms-azuretools.vscode-docker
-            code --install-extension aws-scripting-guy.cform
-            code --install-extension amazonwebservices.aws-toolkit-vscode
-            code --install-extension ms-python.python
-            code --install-extension hashicorp.terraform
+            install_brew_package --cask visual-studio-code
             ;;
-        "New Terminal")
+        "Tilix Terminal")
             install_apt_package tilix
             ;;
         "Docker")
-            sudo apt-get remove docker docker-engine docker.io containerd runc
-            sudo apt-get update
-            sudo apt-get install -y \
-                apt-transport-https \
-                ca-certificates \
-                curl \
-                gnupg \
-                lsb-release
-            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-            echo \
-              "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
-              $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-            sudo apt-get update
-            sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+            install_apt_package docker.io
             sudo systemctl start docker
             sudo systemctl enable docker
             sudo usermod -aG docker $USER
+            ;;
+        "Kitty")
+            install_apt_package kitty
             ;;
         "Git")
             install_apt_package git
@@ -129,23 +120,16 @@ for choice in "${selected_choices[@]}"; do
             chsh -s $(which zsh)
             ;;
         "Starship")
-            curl -fsSL https://starship.rs/install.sh | bash
+            install_brew_package starship
             ;;
         "AWS CLI")
-            install_curl_unzip "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" "awscliv2" "."
-            sudo ./aws/install
+            install_brew_package awscli
             ;;
         "Terraform CLI")
-            curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
-            sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
-            sudo apt-get update && sudo apt-get install terraform
+            install_brew_package terraform
             ;;
         "kubectl")
-            install_apt_package apt-transport-https
-            curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-            echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-            sudo apt-get update
-            install_apt_package kubectl
+            install_brew_package kubectl
             echo 'source <(kubectl completion zsh)' >>~/.zshrc
             ;;
         "fzf")
@@ -163,67 +147,47 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package jq
             ;;
         "yq")
-            setup_ppa "ppa:rmescandon/yq"
-            install_apt_package yq
+            install_brew_package yq
             ;;
         "Golang")
-            wget https://dl.google.com/go/go1.20.4.linux-amd64.tar.gz
-            sudo tar -C /usr/local -xzf go1.20.4.linux-amd64.tar.gz
-            echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.zshrc
-            source ~/.zshrc
+            install_brew_package go
             ;;
         "VirtualBox")
-            sudo apt-get update
             install_apt_package virtualbox
             ;;
         "Nerd Fonts")
-            mkdir -p ~/.local/share/fonts
-            wget -qO- https://github.com/ryanoasis/nerd-fonts/releases/download/v2.2.2/FiraCode.zip | bsdtar -xvf- -C ~/.local/share/fonts
-            fc-cache -fv
+            install_brew_package --cask font-fira-code-nerd-font
             ;;
         "Homebrew")
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-            echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.zshrc
-            eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+            echo "Homebrew is already installed as a prerequisite."
             ;;
         "Git-Cola")
             setup_ppa "ppa:git-core/ppa"
             install_apt_package git-cola
             ;;
         "Node.js")
-            curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash -
-            install_apt_package nodejs
+            install_brew_package node
             ;;
         "Postman")
-            sudo snap install postman
+            install_brew_package --cask postman
             ;;
         "Insomnia")
-            sudo snap install insomnia
+            install_brew_package --cask insomnia
             ;;
         "Ansible")
-            sudo apt-add-repository --yes --update ppa:ansible/ansible
-            install_apt_package ansible
+            install_brew_package ansible
             ;;
         "Azure CLI")
-            curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+            install_brew_package azure-cli
             ;;
         "Google Cloud SDK")
-            echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-            sudo apt-get install apt-transport-https ca-certificates gnupg -y
-            curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg add -
-            sudo apt-get update && sudo apt-get install google-cloud-sdk
+            install_brew_package google-cloud-sdk
             ;;
         "Minikube")
-            curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-            chmod +x minikube-linux-amd64
-            sudo mv minikube-linux-amd64 /usr/local/bin/minikube
+            install_brew_package minikube
             ;;
         "Helm")
-            curl https://baltocdn.com/helm/signing.asc | sudo apt-key add -
-            sudo apt-get install apt-transport-https --yes
-            echo "deb https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
-            sudo apt-get update
-            install_apt_package helm
+            install_brew_package helm
             ;;
     esac
 done
@@ -247,6 +211,11 @@ if [[ " ${selected_choices[@]} " =~ "Git" ]]; then
     git config --global user.email "$(gum input --placeholder 'Enter your git email')"
 fi
 
+# Prompt user for Slack login
+if [[ " ${selected_choices[@]} " =~ "Slack" ]]; then
+    echo "Please log in to Slack using the GUI."
+    slack &
+fi
 
 # Final system update
 sudo apt-get update && sudo apt-get upgrade -y
