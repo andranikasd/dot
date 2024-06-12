@@ -3,6 +3,12 @@ Sure, here is the refactored and corrected script:
 ```bash
 #!/bin/bash
 
+setup_prereq() {
+    sudo apt update
+    sudo apt upgrade -y
+    sudo apt install wget curl git ca-certificates -y 
+}
+
 # Function to install gum
 install_gum() {
     if ! command -v gum &> /dev/null; then
@@ -33,7 +39,8 @@ setup_ppa() {
     sudo apt-get update
 }
 
-# Install gum
+# Setup prereq & Install gum
+setup_prereq
 install_gum
 
 # Prompt user for tools to install
@@ -205,6 +212,5 @@ sudo apt-get update && sudo apt-get upgrade -y
 
 # Final setup
 echo "Setup complete. Please restart your terminal or source your .zshrc file to apply changes."
-```
 
 This script includes the necessary
