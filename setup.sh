@@ -75,9 +75,10 @@ for choice in "${selected_choices[@]}"; do
     case $choice in
         "Browsers")
             install_apt_package firefox
-            wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
+            curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-archive-keyring.gpg
+            echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list > /dev/null
             sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-            sudo apt-get update -qq
+            sudo apt update 
             install_apt_package google-chrome-stable
             ;;
         "Slack")
@@ -86,7 +87,7 @@ for choice in "${selected_choices[@]}"; do
         "PyCharm")
             curl -s https://s3.eu-central-1.amazonaws.com/jetbrains-ppa/0xA6E8698A.pub.asc | gpg --dearmor | sudo tee /usr/share/keyrings/jetbrains-ppa-archive-keyring.gpg > /dev/null
             echo "deb [signed-by=/usr/share/keyrings/jetbrains-ppa-archive-keyring.gpg] http://jetbrains-ppa.s3-website.eu-central-1.amazonaws.com any main" | sudo tee /etc/apt/sources.list.d/jetbrains-ppa.list > /dev/null
-            sudo apt update -qq
+            sudo apt update 
             install_apt_package pycharm-community
             ;;
         "VSCode")
