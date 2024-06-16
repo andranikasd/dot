@@ -66,7 +66,7 @@ choices=$(gum choose --no-limit "${options[@]}")
 
 # Convert the choices into an array
 IFS=$'\n' read -r -d '' -a selected_choices <<< "$choices"
-
+ 
 # Add latest stable PPAs and update
 # setup_ppa "ppa:deadsnakes/ppa"
 
@@ -81,7 +81,7 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package google-chrome-stable
             ;;
         "Slack")
-            install_brew_package slack
+            install_brew_package slackcat
             ;;
         "PyCharm")
             curl -s https://s3.eu-central-1.amazonaws.com/jetbrains-ppa/0xA6E8698A.pub.asc | gpg --dearmor | sudo tee /usr/share/keyrings/jetbrains-ppa-archive-keyring.gpg > /dev/null
