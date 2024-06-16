@@ -74,12 +74,17 @@ IFS=$'\n' read -r -d '' -a selected_choices <<< "$choices"
 for choice in "${selected_choices[@]}"; do
     case $choice in
         "Browsers")
-            install_apt_package firefox
+            # Install Firefox
+            sudo apt update
+            sudo apt install -y firefox
+
+            # Add Google signing key and repository
             curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-archive-keyring.gpg
             echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-archive-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list > /dev/null
-            sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list'
-            sudo apt update 
-            install_apt_package google-chrome-stable
+
+            # Update package list and install Google Chrome
+            sudo apt update
+            sudo apt install -y google-chrome-stable
             ;;
         "Slack")
             sudo snap install slack --classic
