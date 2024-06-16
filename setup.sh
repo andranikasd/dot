@@ -124,6 +124,7 @@ for choice in "${selected_choices[@]}"; do
         "Zsh")
             install_apt_package zsh
             chsh -s $(which zsh)
+            sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
             ;;
         "Starship")
             install_brew_package starship
@@ -163,9 +164,6 @@ for choice in "${selected_choices[@]}"; do
             ;;
         "Nerd Fonts")
             brew install font-fira-code
-            ;;
-        "Homebrew")
-            fancy_log "Homebrew is already installed as a prerequisite."
             ;;
         "Git-Cola")
             setup_ppa "ppa:git-core/ppa"
@@ -221,7 +219,7 @@ fi
 
 # Final system update
 fancy_log "Final system update..."
-sudo apt-get update -qq && sudo apt-get upgrade -y -qq
-
+sudo apt-get update && sudo apt-get upgrade -y
+sudo systemctl daemon-reload
 # Final setup
 fancy_log "Setup complete. Please restart your terminal or source your .zshrc file to apply changes."
