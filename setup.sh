@@ -90,7 +90,7 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package pycharm-community
             ;;
         "VSCode")
-            sudo snap install code
+            sudo snap install code --classic
             ;;
         "Tilix Terminal")
             install_apt_package tilix
