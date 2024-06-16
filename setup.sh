@@ -93,7 +93,7 @@ for choice in "${selected_choices[@]}"; do
             install_brew_package sublime-text
             ;;
         "VSCode")
-            install_brew_package --cask visual-studio-code
+            install_brew_package visual-studio-code
             ;;
         "Tilix Terminal")
             install_apt_package tilix
@@ -165,7 +165,7 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package virtualbox
             ;;
         "Nerd Fonts")
-            brew install --cask font-fira-code-nerd-font
+            brew install font-fira-code-nerd-font
             ;;
         "Homebrew")
             fancy_log "Homebrew is already installed as a prerequisite."
@@ -178,10 +178,10 @@ for choice in "${selected_choices[@]}"; do
             install_brew_package node
             ;;
         "Postman")
-            brew install --cask postman
+            brew install postman
             ;;
         "Insomnia")
-            brew install --cask insomnia
+            brew install insomnia
             ;;
         "Ansible")
             install_brew_package ansible
