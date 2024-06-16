@@ -61,7 +61,7 @@ install_gum
 install_homebrew
 
 # Prompt user for tools to install
-options=("Browsers" "Slack" "PyCharm" "Sublime Text" "VSCode" "Tilix Terminal" "Kitty" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3" "pip" "venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola" "Node.js" "Postman" "Insomnia" "Ansible" "Azure CLI" "Google Cloud SDK" "Minikube" "Helm")
+options=("Browsers" "Slack" "PyCharm" "VSCode" "Tilix Terminal" "Kitty" "Docker" "Git" "CodeCommit" "wget" "curl" "Python3" "pip" "venv" "Zsh" "Starship" "AWS CLI" "Terraform CLI" "kubectl" "fzf" "Vim" "jq" "yq" "Golang" "VirtualBox" "Nerd Fonts" "Homebrew" "Git-Cola" "Node.js" "Postman" "Insomnia" "Ansible" "Azure CLI" "Google Cloud SDK" "Minikube" "Helm")
 choices=$(gum choose --no-limit "${options[@]}")
 
 # Convert the choices into an array
@@ -88,9 +88,6 @@ for choice in "${selected_choices[@]}"; do
             echo "deb [signed-by=/usr/share/keyrings/jetbrains-ppa-archive-keyring.gpg] http://jetbrains-ppa.s3-website.eu-central-1.amazonaws.com any main" | sudo tee /etc/apt/sources.list.d/jetbrains-ppa.list > /dev/null
             sudo apt update -qq
             install_apt_package pycharm-community
-            ;;
-        "Sublime Text")
-            install_brew_package sublime-text
             ;;
         "VSCode")
             install_brew_package visual-studio-code
@@ -165,7 +162,7 @@ for choice in "${selected_choices[@]}"; do
             install_apt_package virtualbox
             ;;
         "Nerd Fonts")
-            brew install font-fira-code-nerd-font
+            brew install font-fira-code
             ;;
         "Homebrew")
             fancy_log "Homebrew is already installed as a prerequisite."
